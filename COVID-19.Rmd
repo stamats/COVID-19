@@ -1,0 +1,411 @@
+---
+title: "COVID-19: Erwartete Anzahl von Toten und Dunkelziffer in Deutschland"
+author: "M. Kohl"
+date: "04.04.2020"
+output:
+  rmarkdown::html_vignette:
+    toc: false
+link-citations: yes
+bibliography: CoronaTote.bib
+---
+
+<center>
+Hochschule Furtwangen
+
+Institute of Precision Medicine 
+
+E-Mail: kohl@hs-furtwangen.de
+</center>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+## Einführung
+
+Nicht nur in Italien [@Rizzello2020], sondern weltweit führen wir aktuell einen 
+Krieg gegen COVID-19. Völlig unklar ist noch, wie viele Todesopfer dieser Krieg 
+fordern wird. Auf Basis aktuell vorliegender Zahlen und mit Hilfe einfacher 
+statistischer Mittel wird im Folgenden die erwartete Anzahl von COVID-19 Toten 
+in Deutschland berechnet. Außerdem wird eine Schätzung für die Dunkelziffer
+ermittelt. Die Berechnungen und graphischen Darstellungen wurden mit der 
+Statistiksoftware R [@Rcore] und den Erweiterungspaketen MKinfer [@MKinfer], 
+ggplot2 [@ggplot2], ggsci [@ggsci] und plotly [@plotly] durchgeführt. Das
+Dokument wurde unter Verwendung von knitr [@knitr] und R Markdown [@rmarkdown] 
+erstellt und findet sich unter https://github.com/stamats/COVID-19.
+
+
+## Bevölkerung in Deutschland
+
+Laut dem Statistischen Bundesamt leben aktuell etwas mehr als 83 Mio. Menschen
+in Deutschland. Für unsere Berechnungen verwenden wir die prognostizierten 
+Zahlen des Statistischen Bundesamtes für 2019 (Simulationsvariante 1) und 
+gehen folglich von einer Bevölkerungszahl von 83.2 Mio.\ Menschen aus [@Destatis2020].
+
+```{r}
+Daten <- read.csv2(file = "14_bevoelkerungsvorausberechnung_daten.csv")
+Daten2019 <- Daten[Daten$Simulationsjahr == 2019, c("Variante", "mw", "Bev")]
+#tapply(Daten2019$Bev, Daten2019$Variante, sum)
+Daten2020 <- Daten[Daten$Simulationsjahr == 2020, c("Variante", "mw", "Bev")]
+#tapply(Daten2020$Bev, Daten2019$Variante, sum)
+N <- 83.2*1e6
+```
+
+Die Abbildung 1 zeigt, wie sich die Bevölkerung von Deutschland 2019 auf 
+verschiedene Altersgruppen verteilte.
+
+```{r, fig.width=7, fig.height=5, fig.cap="Abb. 1: Bevölkerung in Deutschland 2019 aufgeteilt in Altersgruppen."}
+library(ggplot2)
+library(ggsci)
+Daten2019.1 <- Daten[Daten$Simulationsjahr == 2019 & Daten$Variante == 1,]
+Daten2019.2 <- colSums(Daten2019.1[,-(1:3)])
+N.0.20 <- sum(Daten2019.2[2:21])/Daten2019.2[1]*N
+N.20.40 <- sum(Daten2019.2[22:41])/Daten2019.2[1]*N
+N.40.50 <- sum(Daten2019.2[42:51])/Daten2019.2[1]*N
+N.50.60 <- sum(Daten2019.2[52:61])/Daten2019.2[1]*N
+N.60.70 <- sum(Daten2019.2[62:71])/Daten2019.2[1]*N
+N.70.80 <- sum(Daten2019.2[72:81])/Daten2019.2[1]*N
+N.80plus <- sum(Daten2019.2[82:101])/Daten2019.2[1]*N
+DF <- data.frame(Anzahl = c(N.0.20, N.20.40, N.40.50, N.50.60, 
+                            N.60.70, N.70.80, N.80plus)/1e6,
+                 Alter = factor(c("0-20", "20-40", "40-50", "50-60", 
+                                  "60-70", "70-80", "> 80"),
+                                levels = c("0-20", "20-40", "40-50", "50-60",
+                                           "60-70", "70-80", "> 80")))
+ggplot(DF, aes(x = Alter, y = Anzahl, fill = Alter)) +
+  geom_bar(stat = "identity", width = 0.6) + scale_fill_nejm() + 
+  xlab("Altersgruppe") + ylab("Anzahl in Millionen")
+```
+
+Wir werden statistische Ungenauigkeiten bei den Bevölkerungszahlen in den
+folgenden Berechnungen nicht berücksichtigen.
+
+
+## Letalität in China bis 11.02.
+
+Die altersabhängigen Letalitäten -- d.h., die Anteile der Verstorbenen unter 
+allen Erkankten -- in China vom 01.01.2020 bis zum 11.02.2020 sind in 
+Abbildung 2 dargstellt [@Verity2020, Table 1; @Wu2020]. In der Arbeit von 
+Verity et al. (2020) wurde zur Berücksichtigung der statistischen Unsicherheit 
+bei den beobachteten Letalitäten unter anderem das 95%-Konfidenzintervall 
+(95%-KI) von Clopper-Pearson [@Clopper1934] herangezogen. Zur einfacheren 
+Vergleichbarkeit werden wir ebenfalls dieses Konfidenzintervall verwenden, 
+um die statistische Unsicherheit bei den Letalitäten auszudrücken. Wir müssen 
+davon ausgehen, dass es sich hierbei um eine konservative Betrachtung handelt. 
+Die sogenannte Überdeckungswahrscheinlichkeit dieses Intervals ist gerade bei 
+kleinen Wahrscheinlichkeiten größer als 95\%; d.h., das Interval ist etwas zu 
+lang [@Brown2001].
+
+```{r, fig.height=5, fig.width=7, fig.cap="Abb. 2: Letalitäten in China vom 01.01.2020 bis zum 11.02.2020 (inkl. 95%-KI)."}
+library(MKinfer)
+p.0.20 <- (0+1)/(416+549)
+p.0.20.CI <- binomCI(x = 1, n = 416+549)$conf.int
+p.20.40 <- (7+18)/(3619+7600)
+p.20.40.CI <- binomCI(x = 7+18, n = 3619+7600)$conf.int
+p.40.50 <- 38/8571
+p.40.50.CI <- binomCI(x = 38, n = 8571)$conf.int
+p.50.60 <- 130/10008
+p.50.60.CI <- binomCI(x = 130, n = 10008)$conf.int
+p.60.70 <- 309/8583
+p.60.70.CI <- binomCI(x = 309, n = 8583)$conf.int
+p.70.80 <- 312/3918
+p.70.80.CI <- binomCI(x = 312, n = 3918)$conf.int
+p.80plus <- 208/1408
+p.80plus.CI <- binomCI(x = 208, n = 1408)$conf.int
+## kumuliert
+p.kum <- (0+1+7+18+38+130+309+312+208)/(416+549+3619+7600+8571+10008+8583+3918+1408)
+p.kum.CI <- binomCI(x = 0+1+7+18+38+130+309+312+208, 
+                    n = 416+549+3619+7600+8571+10008+8583+3918+1408)$conf.int
+DF <- data.frame(Letalität = round(c(p.0.20, p.20.40, p.40.50, p.50.60, 
+                                     p.60.70, p.70.80, p.80plus, p.kum)*100, 2),
+                 Alter = factor(c("0-20", "20-40", "40-50", "50-60", "60-70", 
+                                  "70-80", "> 80", "kumuliert"),
+                                levels = c("0-20", "20-40", "40-50", "50-60", 
+                                           "60-70", "70-80", "> 80", 
+                                           "kumuliert")),
+                 Letal.low = round(c(p.0.20.CI[1], p.20.40.CI[1], p.40.50.CI[1], 
+                                     p.50.60.CI[1], p.60.70.CI[1], p.70.80.CI[1], 
+                                     p.80plus.CI[1], p.kum.CI[1])*100, 2),
+                 Letal.upp = round(c(p.0.20.CI[2], p.20.40.CI[2], p.40.50.CI[2], 
+                                     p.50.60.CI[2], p.60.70.CI[2], p.70.80.CI[2], 
+                                     p.80plus.CI[2], p.kum.CI[2])*100, 2))
+ggplot(DF, aes(x = Alter, y = Letalität, fill = Alter)) +
+  geom_bar(stat = "identity", width = 0.66) + scale_fill_nejm() + 
+  geom_errorbar(aes(ymin = Letal.low, ymax = Letal.upp),      
+                color = "black", width = 0.15,    
+                position = position_dodge(.5)) +
+  annotate("text", x = 1:8, y = DF$Letalität+c(1,1,1,1,1,1.5,2.5,1), 
+           label = paste0(DF$Letalität, " %")) +
+  xlab("Altersgruppe") + ylab("Letalität in %")
+```
+
+Lässt man das Alter außer Acht, so ergibt sich eine kumulierte Letalität von 
+2.29 % (95%-KI: 2.16 - 2.43 %). Dies liegt etwas über der 
+Einschätzung des Robert-Koch-Instituts, welches von einer Letalität von 
+1-2 % ausgeht [@wiki:COVID].
+Diese Zahlen liegen auch einer aktuellen Simulationsstudie zur Reduktion von 
+Sozialkontakten und deren Auswirkung auf die Pandemie sowie die Herdenimunität 
+für Polen und Deutschland zu Grunde [@Bock2020, Table 1], auf deren Ergebnisse
+wir später noch etwas eingehen werden. 
+
+
+## Erwartete Anzahl von Toten
+
+Wir berechnen die Anzahl der zu erwartenden Toten auf Basis der aktuellen
+Bevölkerungszahlen, der altersabhängigen Letalitäten aus China und der
+Annahme einer altersunabhängigen Durchseuchung zwischen 15 % und 85 %. Die
+Berechnung basiert auf folgender einfacher Formel
+$$
+  \text{Erwartete Anzahl Tote} = N_{\text{Altersgruppe}} \times D
+  \times L_{\text{Altersgruppe}}
+$$
+Hiebei steht $N_{\text{Altersgruppe}}$ für die Anzahl der Personen in der 
+jeweiligen Altersgruppe, $L_{\text{Altersgruppe}}$ für die Letalität in dieser 
+Altersgruppe und $D$ für die altersunabhängige Durchseuchungsrate. Folglich
+entspricht $N_{\text{Altersgruppe}}\times D$ der erwarteten Anzahl von Erkrankten
+in der jeweiligen Altersgruppe und 
+$N_{\text{Altersgruppe}}\times L_{\text{Altersgruppe}}$ der erwarteten Anzahl 
+von Toten in der jeweiligen Altersgruppe bei einer Durchseuchung von 100\%.
+Wir verwenden neben den beobachteten Letalitäten auch die unteren und oberen 
+Grenzen der 95%-Konfidenzintervalle und berechnen hieraus sogenannte 
+(punktweise) 95%-Konfidenzbänder.
+
+```{r, fig.width=7.5, fig.height=8, fig.cap="Abb. 3: Erwartete Anzahl von Toten in Deutschland in Abhängigkeit von der Durchseuchung (inkl. 95%-Konfidenzbänder)."}
+library(plotly)
+## Durchseuchung (altersunabhängig)
+p.krank <- seq(from = 0.15, to = 0.85, by = 0.01)
+## Zu erwartende Tote in D
+Tote.0.20 <- N.0.20*p.krank*p.0.20
+Tote.20.40 <- N.20.40*p.krank*p.20.40
+Tote.40.50 <- N.40.50*p.krank*p.40.50
+Tote.50.60 <- N.50.60*p.krank*p.50.60
+Tote.60.70 <- N.60.70*p.krank*p.60.70
+Tote.70.80 <- N.70.80*p.krank*p.70.80
+Tote.80plus <- N.80plus*p.krank*p.80plus
+Tote.kum <- (Tote.0.20 + Tote.20.40 + Tote.40.50 + Tote.50.60 + 
+               Tote.60.70 + Tote.70.80 + Tote.80plus)
+Tote.0.20.low <- N.0.20*p.krank*p.0.20.CI[1]
+Tote.20.40.low <- N.20.40*p.krank*p.20.40.CI[1]
+Tote.40.50.low <- N.40.50*p.krank*p.40.50.CI[1]
+Tote.50.60.low <- N.50.60*p.krank*p.50.60.CI[1]
+Tote.60.70.low <- N.60.70*p.krank*p.60.70.CI[1]
+Tote.70.80.low <- N.70.80*p.krank*p.70.80.CI[1]
+Tote.80plus.low <- N.80plus*p.krank*p.80plus.CI[1]
+Tote.kum.low <- (Tote.0.20.low + Tote.20.40.low + Tote.40.50.low + 
+                   Tote.50.60.low + Tote.60.70.low + Tote.70.80.low + 
+                   Tote.80plus.low)
+Tote.0.20.upp <- N.0.20*p.krank*p.0.20.CI[2]
+Tote.20.40.upp <- N.20.40*p.krank*p.20.40.CI[2]
+Tote.40.50.upp <- N.40.50*p.krank*p.40.50.CI[2]
+Tote.50.60.upp <- N.50.60*p.krank*p.50.60.CI[2]
+Tote.60.70.upp <- N.60.70*p.krank*p.60.70.CI[2]
+Tote.70.80.upp <- N.70.80*p.krank*p.70.80.CI[2]
+Tote.80plus.upp <- N.80plus*p.krank*p.80plus.CI[2]
+Tote.kum.upp <- (Tote.0.20.upp + Tote.20.40.upp + Tote.40.50.upp + 
+                   Tote.50.60.upp + Tote.60.70.upp + Tote.70.80.upp + 
+                   Tote.80plus.upp)
+DF <- data.frame(Durchseuchung = rep(p.krank, 8)*100,
+                 Altersgruppe = rep(c("0-20", "20-40", "40-50", "50-60", 
+                                      "60-70", "70-80", "80+",
+                                      "kumulativ"),
+                                    each = length(p.krank)),
+                 Tote = round(c(Tote.0.20, Tote.20.40, Tote.40.50, 
+                                Tote.50.60, Tote.60.70, Tote.70.80,
+                                Tote.80plus, Tote.kum)),
+                 Tote.low = round(c(Tote.0.20.low, Tote.20.40.low, 
+                                    Tote.40.50.low, Tote.50.60.low, 
+                                    Tote.60.70.low, Tote.70.80.low,
+                                    Tote.80plus.low, Tote.kum.low)),
+                 Tote.upp = round(c(Tote.0.20.upp, Tote.20.40.upp, 
+                                    Tote.40.50.upp, Tote.50.60.upp, 
+                                    Tote.60.70.upp, Tote.70.80.upp,
+                                    Tote.80plus.upp, Tote.kum.upp)))
+## Graphische Darstellung
+farben <- pal_nejm()(8)
+gg1 <- ggplot(DF, aes(x = Durchseuchung, y = Tote, color = Altersgruppe)) +
+  geom_line() + xlab("Durchseuchungsrate [%]") + ylab("Anzahl Tote") +
+  scale_y_log10() + scale_color_nejm() + xlim(0,100) +
+  geom_line(aes(y = Tote.low), linetype = "dashed") +
+  geom_line(aes(y = Tote.upp), linetype = "dashed") +
+#  geom_ribbon(aes(ymin = Tote.low, ymax = Tote.upp, fill = Altersgruppe)) +
+  annotate("point", x = rep(15, 8), y = DF$Tote[DF$Durchseuchung == 15],
+           color = farben) +
+  annotate("text", x = rep(15, 8)-(c(3.5,3.5,3.5,3.5,4,4.5,4.5,4.5)+2), 
+           y = DF$Tote[DF$Durchseuchung == 15]*c(1,1.06,0.94,1,1,1,1,1),
+           label = as.character(DF$Tote[DF$Durchseuchung == 15]),
+           color = farben, size = 4) +
+  annotate("point", x = rep(85, 8), y = DF$Tote[DF$Durchseuchung == 85],
+           color = farben) +
+  annotate("text", x = rep(85, 8)+c(4,4,4,4,4.5,4.5,4.5,5)+2, 
+           y = DF$Tote[DF$Durchseuchung == 85]*c(1,1.06,0.94,1,1,1,1,1),
+           label = as.character(DF$Tote[DF$Durchseuchung == 85]),
+           color = farben, size = 4)
+ggplotly(gg1)
+```
+
+Wir sehen anhand des sehr breiten Konfidenzbandes, dass gerade für junge Menschen 
+bis zu einem Alter von 20 Jahren die Vorhersage der erwarteten Anzahl von Toten 
+noch recht schwierig ist. Dies liegt daran, dass für diese Altersgruppe die 
+Letalitätsschätzung noch recht ungenau ist. 
+
+Gehen wir davon aus, dass ohne entsprechend strikte Maßnahmen eine Durchseuchung 
+von 60-70% nötig sein wird, um die Pandemie zu stoppen, so ergibt unsere obige
+Berechnung, dass wir mit ca. 1.26-1.47 Millionen Toten in Deutschland rechnen 
+müssen [@Drosten2020]. Zum Vergleich: in Deutschland starben 2018 und 2019 
+jeweils ca. 950.000 Menschen [@Destatis2020b].
+Gelänge es hingegen durch strikte Maßnahmen eine Durchseuchung 
+von nur 15% oder weniger zu erreichen, was laut einer aktuellen Simulationsstudie 
+durch eine sehr starke Reduktion der Sozialkontakte möglich sein könnte, so 
+könnte dies alleine in Deutschland mehr als 1 Million Menschenleben retten 
+[@Bock2020].
+
+
+## Dunkelziffer 
+
+Wir vergleichen die Ergebnisse unserer Berechnungen mit den aktuellen Zahlen vom
+04.04.2020 [@Worldometers2020]. Es gab bis zu diesem Datum 96092 bekannte Fälle 
+von COVID-19 in Deutschland. Davon sind 26400 bereits wieder gesund und 1444 
+verstorben, was 27844 abgeschlossenen und 68248 aktiven Fällen entspricht. 
+Kombinieren wir die Zahlen zu den abgeschlossenen Fällen mit den Letalitäten aus 
+China und nehmen an, dass die Verteilung der Fälle auf die Altersgruppen der 
+Verteilung der Altersgruppen in der Bevölkerung entspricht, da hierzu keine 
+genauen Zahlen vorliegen, so können wir mit der oben angegebenen Formel 
+die erwartete Anzahl von Toten je Altersgruppe berechnen.
+
+```{r, fig.height=5, fig.width=7, fig.cap="Abb. 4: Erwartete Anzahl von Toten pro Altersgruppe in Deutschland zum 04.04.2020 (inkl. 95%-KI)."}
+M <- 26400+1444
+p.krank <- M/N
+M.tot <- 1444
+p.tot <- M.tot/M
+## Zu erwartende Tote in D
+Tote.0.20 <- N.0.20*p.krank*p.0.20
+Tote.20.40 <- N.20.40*p.krank*p.20.40
+Tote.40.50 <- N.40.50*p.krank*p.40.50
+Tote.50.60 <- N.50.60*p.krank*p.50.60
+Tote.60.70 <- N.60.70*p.krank*p.60.70
+Tote.70.80 <- N.70.80*p.krank*p.70.80
+Tote.80plus <- N.80plus*p.krank*p.80plus
+Tote.kum <- (Tote.0.20 + Tote.20.40 + Tote.40.50 + Tote.50.60 + 
+               Tote.60.70 + Tote.70.80 + Tote.80plus)
+Tote.0.20.low <- N.0.20*p.krank*p.0.20.CI[1]
+Tote.20.40.low <- N.20.40*p.krank*p.20.40.CI[1]
+Tote.40.50.low <- N.40.50*p.krank*p.40.50.CI[1]
+Tote.50.60.low <- N.50.60*p.krank*p.50.60.CI[1]
+Tote.60.70.low <- N.60.70*p.krank*p.60.70.CI[1]
+Tote.70.80.low <- N.70.80*p.krank*p.70.80.CI[1]
+Tote.80plus.low <- N.80plus*p.krank*p.80plus.CI[1]
+Tote.kum.low <- (Tote.0.20.low + Tote.20.40.low + Tote.40.50.low + 
+                   Tote.50.60.low + Tote.60.70.low + Tote.70.80.low + 
+                   Tote.80plus.low)
+Tote.0.20.upp <- N.0.20*p.krank*p.0.20.CI[2]
+Tote.20.40.upp <- N.20.40*p.krank*p.20.40.CI[2]
+Tote.40.50.upp <- N.40.50*p.krank*p.40.50.CI[2]
+Tote.50.60.upp <- N.50.60*p.krank*p.50.60.CI[2]
+Tote.60.70.upp <- N.60.70*p.krank*p.60.70.CI[2]
+Tote.70.80.upp <- N.70.80*p.krank*p.70.80.CI[2]
+Tote.80plus.upp <- N.80plus*p.krank*p.80plus.CI[2]
+Tote.kum.upp <- (Tote.0.20.upp + Tote.20.40.upp + Tote.40.50.upp + 
+                   Tote.50.60.upp + Tote.60.70.upp + Tote.70.80.upp + 
+                   Tote.80plus.upp)
+DF <- data.frame(Altersgruppe = rep(c("0-20", "20-40", "40-50", "50-60", 
+                                      "60-70", "70-80", "80+",
+                                      "kumulativ"),
+                                    each = length(p.krank)),
+                 Tote = round(c(Tote.0.20, Tote.20.40, Tote.40.50, 
+                                Tote.50.60, Tote.60.70, Tote.70.80,
+                                Tote.80plus, Tote.kum)),
+                 Tote.low = round(c(Tote.0.20.low, Tote.20.40.low, 
+                                    Tote.40.50.low, Tote.50.60.low, 
+                                    Tote.60.70.low, Tote.70.80.low,
+                                    Tote.80plus.low, Tote.kum.low)),
+                 Tote.upp = round(c(Tote.0.20.upp, Tote.20.40.upp, 
+                                    Tote.40.50.upp, Tote.50.60.upp, 
+                                    Tote.60.70.upp, Tote.70.80.upp,
+                                    Tote.80plus.upp, Tote.kum.upp)))
+ggplot(DF, aes(x = Altersgruppe, y = Tote, fill = Altersgruppe)) +
+  geom_bar(stat = "identity", width = 0.66) + scale_fill_nejm() + 
+  geom_errorbar(aes(ymin = Tote.low, ymax = Tote.upp),      
+                color = "black", width = 0.15,
+                position = position_dodge(.5)) +
+  annotate("text", x = 1:8, y = DF$Tote+c(40, 30, 30, 30, 30, 40, 60, 150), 
+           label = DF$Tote) +
+  xlab("Altersgruppe") + ylab("Tote")
+```
+
+Demnach sollten sich unter den abgeschlossenen Fällen `r round(Tote.kum)` Tote 
+(95%-KI: 612 - 824) befinden. Ein Grund für den Unterschied 
+zwischen den beobachteten und den berechneten Zahlen könnte neben der nicht 
+genau bekannten Letalität und Verteilung der abgeschlossenen Fälle auf die 
+Alterssgruppen eine entsprechende Dunkelziffer sein. Gehen wir weiter davon aus, 
+dass die Letalitäten von China auch auf Deutschland zutreffen, die Verteilung der 
+abgeschlossenen Fälle auf die Altergruppen der Verteilung der Altersgruppen 
+in der Bevölkerung entspricht und eine altersunabhängige Durchseuchungsrate 
+vorliegt, so können wir aus der aktuellen Anzahl von Toten die tatsächliche 
+aktuelle Durchseuchungsrate berechnen. Es gilt
+$$
+  D_\text{aktuell} = \frac{\text{Anzahl Tote aktuell}}{\text{Erwartete Anzahl Tote insgesamt}}
+$$
+Die erwartete Anzahl von Toten insgesamt erhält man, indem man die erwartete
+Anzahl von Toten für jede Altersgruppe bei 100% Durchseuchung summiert; d.h.,
+$$
+  \text{Erwartete Anzahl Tote insgesamt} = \sum\limits_{\text{Altersgruppen}} 
+  N_{\text{Altersgruppe}}\times L_{\text{Altersgruppe}}
+$$
+
+```{r}
+N.tot <- c(N.0.20*p.0.20 + N.20.40*p.20.40 + N.40.50*p.40.50 + 
+             N.50.60*p.50.60 + N.60.70*p.60.70 + N.70.80*p.70.80 + 
+             N.80plus*p.80plus)
+p.tat.krank <- M.tot/N.tot
+M.tat.krank <- p.tat.krank*N
+N.tot.low <- c(N.0.20*p.0.20.CI[1] + N.20.40*p.20.40.CI[1] + 
+             N.40.50*p.40.50.CI[1] + N.50.60*p.50.60.CI[1] + 
+             N.60.70*p.60.70.CI[1] + N.70.80*p.70.80.CI[1] + 
+             N.80plus*p.80plus.CI[1])
+p.tat.krank.low <- M.tot/N.tot.low
+M.tat.krank.low <- p.tat.krank.low*N
+N.tot.upp <- c(N.0.20*p.0.20.CI[2] + N.20.40*p.20.40.CI[2] + 
+             N.40.50*p.40.50.CI[2] + N.50.60*p.50.60.CI[2] + 
+             N.60.70*p.60.70.CI[2] + N.70.80*p.70.80.CI[2] + 
+             N.80plus*p.80plus.CI[2])
+p.tat.krank.upp <- M.tot/N.tot.upp
+M.tat.krank.upp <- p.tat.krank.upp*N
+```
+
+Dies führt auf eine geschätzte Durchseuchung von ca.\ 689 pro Million 
+(95%-KI: 587 - 789). Sollte 
+dies zutreffen, so ergeben sich nicht 27844, sondern bereits 57309 abgeschlossene 
+COVID-19 Fälle (95%-KI: 48802 - 65675) in Deutschland. Dies würde bedeuten, dass 
+bisher ca.\ die Hälfte (95%-KI: 42.4 - 57.1 %) der COVID-19 Fälle in Deutschland 
+auch entdeckt wurden. Dies deckt sich sehr gut mit der Einschätzung des 
+Robert-Koch-Instituts, welches davon ausgeht, dass etwa die Hälfte der Fälle 
+durch Tests erfasst werden [@wiki:COVID].
+
+
+## Diskussion
+Da die genaue Letalität von COVID-19 nicht bekannt ist [@wiki:COVID], ist die 
+erwartete Anzahl von Toten entsprechend ungewiss. Die obigen Berechnungen 
+legen jedoch nahe, dass durch Maßnahmen, welche die Durchseuchungsrate deutlich 
+reduzieren, alleine in Deutschland hundertausende Menschenleben gerettet werden 
+könnten. Unklar ist jedoch, ob und in welchem Umfang die dafür nötigen strengen 
+Maßnahmen, sei es direkt oder indirekt, ebenfalls Menschenleben kosten könnten. 
+
+Es werden jedoch nicht nur sehr viele Menschen durch diese Pandemie ihr Leben
+verlieren, sondern auch sehr viele Menschen Folgeschäden davontragen. Aktuell 
+geht man davon aus, dass das SARS‐CoV‐2 Virus neben Lungenschäden auch 
+Schädigungen des Herz-Kreislauf-Systems und des Gehirns verursacht 
+[@Zhang2020; @Madjid2020;@Li2020]. 
+Die Häufigkeit und Stärke solcher Folgeerkrankungen ist im Moment jedoch noch 
+weitgehend unbekannt. Wir können aber totzdem davon ausgehen, dass länger 
+andauerende strikte Maßnahmen nicht nur sehr viele Menschen vor dem Tod bewahren, 
+sondern auch sehr viele vor gesundheitlichen Folgeschäden schützen würden. Je 
+nach Umfang und Stärke dieser Schäden könnten diese eine nicht unerhebliche 
+zukünftige Belastung für das Gesundheitssystem darstellen und einen entsprechenden 
+ökonomischen Folgeschaden bedeuten.
+
+
+## Literatur
+
+
+
