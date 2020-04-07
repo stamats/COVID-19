@@ -2,7 +2,7 @@
 lang: de-DE
 title: "COVID-19: Erwartete Anzahl von Toten und Dunkelziffer in Deutschland"
 author: Matthias Kohl
-date: "04.04.2020"
+date: "06.04.2020"
 output:
     rmarkdown::pdf_document:
       fig_caption: true
