@@ -1,7 +1,7 @@
 ---
 title: "COVID-19: Erwartete Anzahl von Toten und Dunkelziffer in Deutschland"
 author: "M. Kohl"
-date: "04.04.2020"
+date: "06.04.2020"
 output:
   rmarkdown::html_vignette:
     toc: false
@@ -100,23 +100,24 @@ lang [@Brown2001].
 ```{r, fig.height=5, fig.width=7, fig.cap="Abb. 2: Letalitäten in China vom 01.01.2020 bis zum 11.02.2020 (inkl. 95%-KI)."}
 library(MKinfer)
 p.0.20 <- (0+1)/(416+549)
-p.0.20.CI <- binomCI(x = 1, n = 416+549)$conf.int
+p.0.20.CI <- binomCI(x = 1, n = 416+549, method = "clopper-pearson")$conf.int
 p.20.40 <- (7+18)/(3619+7600)
-p.20.40.CI <- binomCI(x = 7+18, n = 3619+7600)$conf.int
+p.20.40.CI <- binomCI(x = 7+18, n = 3619+7600, method = "clopper-pearson")$conf.int
 p.40.50 <- 38/8571
-p.40.50.CI <- binomCI(x = 38, n = 8571)$conf.int
+p.40.50.CI <- binomCI(x = 38, n = 8571, method = "clopper-pearson")$conf.int
 p.50.60 <- 130/10008
-p.50.60.CI <- binomCI(x = 130, n = 10008)$conf.int
+p.50.60.CI <- binomCI(x = 130, n = 10008, method = "clopper-pearson")$conf.int
 p.60.70 <- 309/8583
-p.60.70.CI <- binomCI(x = 309, n = 8583)$conf.int
+p.60.70.CI <- binomCI(x = 309, n = 8583, method = "clopper-pearson")$conf.int
 p.70.80 <- 312/3918
-p.70.80.CI <- binomCI(x = 312, n = 3918)$conf.int
+p.70.80.CI <- binomCI(x = 312, n = 3918, method = "clopper-pearson")$conf.int
 p.80plus <- 208/1408
-p.80plus.CI <- binomCI(x = 208, n = 1408)$conf.int
+p.80plus.CI <- binomCI(x = 208, n = 1408, method = "clopper-pearson")$conf.int
 ## kumuliert
 p.kum <- (0+1+7+18+38+130+309+312+208)/(416+549+3619+7600+8571+10008+8583+3918+1408)
 p.kum.CI <- binomCI(x = 0+1+7+18+38+130+309+312+208, 
-                    n = 416+549+3619+7600+8571+10008+8583+3918+1408)$conf.int
+                    n = 416+549+3619+7600+8571+10008+8583+3918+1408,
+                    method = "clopper-pearson")$conf.int
 DF <- data.frame(Letalität = round(c(p.0.20, p.20.40, p.40.50, p.50.60, 
                                      p.60.70, p.70.80, p.80plus, p.kum)*100, 2),
                  Alter = factor(c("0-20", "20-40", "40-50", "50-60", "60-70", 
@@ -141,7 +142,7 @@ ggplot(DF, aes(x = Alter, y = Letalität, fill = Alter)) +
 ```
 
 Lässt man das Alter außer Acht, so ergibt sich eine kumulierte Letalität von 
-2.29 % (95%-KI: 2.16 - 2.43 %). Dies liegt etwas über der 
+2.29 % (95%-KI: 2.15 - 2.43 %). Dies liegt etwas über der 
 Einschätzung des Robert-Koch-Instituts, welches von einer Letalität von 
 1-2 % ausgeht [@wiki:COVID].
 Diese Zahlen liegen auch einer aktuellen Simulationsstudie zur Reduktion von 
@@ -264,9 +265,9 @@ könnte dies alleine in Deutschland mehr als 1 Million Menschenleben retten
 ## Dunkelziffer 
 
 Wir vergleichen die Ergebnisse unserer Berechnungen mit den aktuellen Zahlen vom
-04.04.2020 [@Worldometers2020]. Es gab bis zu diesem Datum 96092 bekannte Fälle 
-von COVID-19 in Deutschland. Davon sind 26400 bereits wieder gesund und 1444 
-verstorben, was 27844 abgeschlossenen und 68248 aktiven Fällen entspricht. 
+06.04.2020 [@Worldometers2020]. Es gab bis zu diesem Datum 103.375 bekannte Fälle 
+von COVID-19 in Deutschland. Davon sind 36081 bereits wieder gesund und 1810 
+verstorben, was 37891 abgeschlossenen und 65484 aktiven Fällen entspricht. 
 Kombinieren wir die Zahlen zu den abgeschlossenen Fällen mit den Letalitäten aus 
 China und nehmen an, dass die Verteilung der Fälle auf die Altersgruppen der 
 Verteilung der Altersgruppen in der Bevölkerung entspricht, da hierzu keine 
@@ -274,9 +275,9 @@ genauen Zahlen vorliegen, so können wir mit der oben angegebenen Formel
 die erwartete Anzahl von Toten je Altersgruppe berechnen.
 
 ```{r, fig.height=5, fig.width=7, fig.cap="Abb. 4: Erwartete Anzahl von Toten pro Altersgruppe in Deutschland zum 04.04.2020 (inkl. 95%-KI)."}
-M <- 26400+1444
+M <- 36081+1810
 p.krank <- M/N
-M.tot <- 1444
+M.tot <- 1810
 p.tot <- M.tot/M
 ## Zu erwartende Tote in D
 Tote.0.20 <- N.0.20*p.krank*p.0.20
@@ -328,13 +329,13 @@ ggplot(DF, aes(x = Altersgruppe, y = Tote, fill = Altersgruppe)) +
   geom_errorbar(aes(ymin = Tote.low, ymax = Tote.upp),      
                 color = "black", width = 0.15,
                 position = position_dodge(.5)) +
-  annotate("text", x = 1:8, y = DF$Tote+c(40, 30, 30, 30, 30, 40, 60, 150), 
+  annotate("text", x = 1:8, y = DF$Tote+c(45, 30, 30, 30, 40, 50, 70, 190), 
            label = DF$Tote) +
   xlab("Altersgruppe") + ylab("Tote")
 ```
 
 Demnach sollten sich unter den abgeschlossenen Fällen `r round(Tote.kum)` Tote 
-(95%-KI: 612 - 824) befinden. Ein Grund für den Unterschied 
+(95%-KI: 828 - 1121) befinden. Ein Grund für den Unterschied 
 zwischen den beobachteten und den berechneten Zahlen könnte neben der nicht 
 genau bekannten Letalität und Verteilung der abgeschlossenen Fälle auf die 
 Alterssgruppen eine entsprechende Dunkelziffer sein. Gehen wir weiter davon aus, 
@@ -373,11 +374,11 @@ p.tat.krank.upp <- M.tot/N.tot.upp
 M.tat.krank.upp <- p.tat.krank.upp*N
 ```
 
-Dies führt auf eine geschätzte Durchseuchung von ca.\ 689 pro Million 
-(95%-KI: 587 - 789). Sollte 
-dies zutreffen, so ergeben sich nicht 27844, sondern bereits 57309 abgeschlossene 
-COVID-19 Fälle (95%-KI: 48802 - 65675) in Deutschland. Dies würde bedeuten, dass 
-bisher ca.\ die Hälfte (95%-KI: 42.4 - 57.1 %) der COVID-19 Fälle in Deutschland 
+Dies führt auf eine geschätzte Durchseuchung von ca.\ 863 pro Million 
+(95%-KI: 735 - 996). Sollte 
+dies zutreffen, so ergeben sich nicht 37891, sondern bereits 71835 abgeschlossene 
+COVID-19 Fälle (95%-KI: 61178 - 82855) in Deutschland. Dies würde bedeuten, dass 
+bisher ca.\ die Hälfte (95%-KI: 45.7 - 61.2 %) der COVID-19 Fälle in Deutschland 
 auch entdeckt wurden. Dies deckt sich sehr gut mit der Einschätzung des 
 Robert-Koch-Instituts, welches davon ausgeht, dass etwa die Hälfte der Fälle 
 durch Tests erfasst werden [@wiki:COVID].
