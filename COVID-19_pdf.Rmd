@@ -38,7 +38,7 @@ Statistiksoftware R [@Rcore] und den Erweiterungspaketen MKinfer [@MKinfer],
 ggplot2 [@ggplot2], ggsci [@ggsci] und plotly [@plotly] durchgeführt. Das
 Dokument wurde unter Verwendung von knitr [@knitr] und R Markdown [@rmarkdown] 
 erstellt. Eine interaktive html-Version inklusive der zugehörigen R Markdown 
-Datein findet sich unter https://github.com/stamats/COVID-19.
+Datei findet sich unter https://github.com/stamats/COVID-19.
 
 
 ## Bevölkerung in Deutschland
