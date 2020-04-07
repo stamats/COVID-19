@@ -233,13 +233,13 @@ gg1 <- ggplot(DF, aes(x = Durchseuchung, y = Tote, color = Altersgruppe)) +
   annotate("point", x = rep(15, 8), y = DF$Tote[DF$Durchseuchung == 15],
            color = farben) +
   annotate("text", x = rep(15, 8)-(c(3.5,3.5,3.5,3.5,4,4.5,4.5,4.5)+2), 
-           y = DF$Tote[DF$Durchseuchung == 15]*c(1,1.06,0.94,1,1,1,1,1),
+           y = DF$Tote[DF$Durchseuchung == 15]*c(1,1.08,0.92,1,1,1,1,1),
            label = as.character(DF$Tote[DF$Durchseuchung == 15]),
            color = farben, size = 4) +
   annotate("point", x = rep(85, 8), y = DF$Tote[DF$Durchseuchung == 85],
            color = farben) +
   annotate("text", x = rep(85, 8)+c(4,4,4,4,4.5,4.5,4.5,5)+2, 
-           y = DF$Tote[DF$Durchseuchung == 85]*c(1,1.06,0.94,1,1,1,1,1),
+           y = DF$Tote[DF$Durchseuchung == 85]*c(1,1.08,0.92,1,1,1,1,1),
            label = as.character(DF$Tote[DF$Durchseuchung == 85]),
            color = farben, size = 4)
 ggplotly(gg1)
@@ -329,7 +329,7 @@ ggplot(DF, aes(x = Altersgruppe, y = Tote, fill = Altersgruppe)) +
   geom_errorbar(aes(ymin = Tote.low, ymax = Tote.upp),      
                 color = "black", width = 0.15,
                 position = position_dodge(.5)) +
-  annotate("text", x = 1:8, y = DF$Tote+c(45, 30, 30, 30, 40, 50, 70, 190), 
+  annotate("text", x = 1:8, y = DF$Tote+c(60, 35, 30, 40, 40, 50, 70, 190), 
            label = DF$Tote) +
   xlab("Altersgruppe") + ylab("Tote")
 ```
