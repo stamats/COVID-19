@@ -102,7 +102,7 @@ Die sogenannte Überdeckungswahrscheinlichkeit dieses Intervals ist gerade bei
 kleinen Wahrscheinlichkeiten größer als 95\%; d.h., das Interval ist etwas zu 
 lang [@Brown2001].
 
-```{r, fig.height=5, fig.width=7, fig.cap="Abb. 2: Letalitäten in China vom 01.01.2020 bis zum 11.02.2020 (inkl. 95%-KI)."}
+```{r, fig.height=5, fig.width=7, fig.cap="Letalitäten in China vom 01.01.2020 bis zum 11.02.2020 (inkl. 95%-KI)."}
 library(MKinfer)
 p.0.20 <- (0+1)/(416+549)
 p.0.20.CI <- binomCI(x = 1, n = 416+549, method = "clopper-pearson")$conf.int
@@ -177,7 +177,7 @@ Wir verwenden neben den beobachteten Letalitäten auch die unteren und oberen
 Grenzen der 95%-Konfidenzintervalle und berechnen hieraus sogenannte 
 (punktweise) 95%-Konfidenzbänder.
 
-```{r, fig.width=7.5, fig.height=8, fig.cap="Abb. 3: Erwartete Anzahl von Toten in Deutschland in Abhängigkeit von der Durchseuchung (inkl. 95%-Konfidenzbänder)."}
+```{r, fig.width=7.5, fig.height=8, fig.cap="Erwartete Anzahl von Toten in Deutschland in Abhängigkeit von der Durchseuchung (inkl. 95%-Konfidenzbänder)."}
 library(plotly)
 ## Durchseuchung (altersunabhängig)
 p.krank <- seq(from = 0.15, to = 0.85, by = 0.01)
@@ -279,7 +279,7 @@ Verteilung der Altersgruppen in der Bevölkerung entspricht, da hierzu keine
 genauen Zahlen vorliegen, so können wir mit der oben angegebenen Formel 
 die erwartete Anzahl von Toten je Altersgruppe berechnen.
 
-```{r, fig.height=5, fig.width=7, fig.cap="Abb. 4: Erwartete Anzahl von Toten pro Altersgruppe in Deutschland zum 04.04.2020 (inkl. 95%-KI)."}
+```{r, fig.height=5, fig.width=7, fig.cap="Erwartete Anzahl von Toten pro Altersgruppe in Deutschland zum 06.04.2020 (inkl. 95%-KI)."}
 M <- 36081+1810
 p.krank <- M/N
 M.tot <- 1810

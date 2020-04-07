@@ -274,7 +274,7 @@ Verteilung der Altersgruppen in der Bevölkerung entspricht, da hierzu keine
 genauen Zahlen vorliegen, so können wir mit der oben angegebenen Formel 
 die erwartete Anzahl von Toten je Altersgruppe berechnen.
 
-```{r, fig.height=5, fig.width=7, fig.cap="Abb. 4: Erwartete Anzahl von Toten pro Altersgruppe in Deutschland zum 04.04.2020 (inkl. 95%-KI)."}
+```{r, fig.height=5, fig.width=7, fig.cap="Abb. 4: Erwartete Anzahl von Toten pro Altersgruppe in Deutschland zum 06.04.2020 (inkl. 95%-KI)."}
 M <- 36081+1810
 p.krank <- M/N
 M.tot <- 1810
