@@ -540,6 +540,11 @@ gg1 <- ggplot(DF, aes(x = Durchseuchung, y = Tote, color = Altersgruppe)) +
 ggplotly(gg1)
 ```
 
+Die Altersgruppe von 0-20 ist hier nur schwer einzuschätzen, da in Korea bis
+zum 20.03. kein Todesfall in dieser Altersgruppe beobachtet wurde. Es ist in
+der Abbildung, welche eine logarithmische Achsenskalierung verwendet, daher 
+nur die obere Grenze des 95%-Konfidenzbandes klar zu sehen.
+
 Legen wir die Zahlen aus Korea zugrunde, so liegt die erwartete Anzahl von 
 Toten bei einer angenommenen Durchseuchung von 60-70% bei ca. 0,76-0,87 
 Millionen Tote in Deutschland, wobei die statistische Unsicherheit deutlich 
