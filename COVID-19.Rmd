@@ -677,6 +677,13 @@ auch entdeckt wurden. Dies deckt sich sehr gut mit der Einschätzung des
 Robert-Koch-Instituts, welches davon ausgeht, dass etwa die Hälfte der Fälle 
 durch Tests erfasst werden [@wiki:COVID].
 
+Ein Problem bei der obigen Berechnung des Anteils der entdeckten Fälle ist, dass 
+es keine Meldepflicht für die Genesenen gibt. Entsprechend ist es gut möglich, 
+dass die gemeldete Zahl der Genesenen eine untere Grenze für die tatsächliche 
+Anzahl an Genesenen darstellt. Ist jedoch die Anzahl der Genesenen höher, so 
+erhöht dies den oben berechneten Anteil an entdeckten Fällen; d.h., die 
+Dunkelziffer reduziert sich.
+
 
 ### Basis: Adjustierte Letalitäten in China bis 11.02.
 
