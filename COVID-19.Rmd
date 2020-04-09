@@ -214,8 +214,9 @@ Einschätzung des Robert-Koch-Instituts, welches von einer Letalität von
 
 Die altersabhängigen Letalitäten in Korea bis zum 20.03.2020 sind unten 
 dargestellt [@Shim2020, Table 2]. In der Arbeit von Shim et al. (2020)
-sind keine Konfidenzintervalle angegeben. Wir berechnen und verwenden wieder
-95%-Konfidenzintervall (95%-KI) von Clopper-Pearson [@Clopper1934]. 
+sind keine Konfidenzintervalle angegeben. Wir berechnen und verwenden 
+zusätzlich das 95%-Konfidenzintervall (95%-KI) von Clopper-Pearson 
+[@Clopper1934] wie im Fall der beobachteten Letalitäten in China. 
 
 ```{r, fig.height=5, fig.width=7, fig.cap="Beobachtete Letalitäten in Korea bis zum 20.03.2020 (inkl. 95%-KI)."}
 p.K.0.20 <- (0+0)/(97+452)
