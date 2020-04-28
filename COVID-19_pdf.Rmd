@@ -52,12 +52,13 @@ Zahlen des Statistischen Bundesamtes für 2019 (Simulationsvariante 1) und
 gehen folglich von einer Bevölkerungszahl von 83,2 Mio.\ Menschen aus [@Destatis2020].
 
 ```{r}
-Daten <- read.csv2(file = "14_bevoelkerungsvorausberechnung_daten.csv")
-Daten2019 <- Daten[Daten$Simulationsjahr == 2019, c("Variante", "mw", "Bev")]
-#tapply(Daten2019$Bev, Daten2019$Variante, sum)
-Daten2020 <- Daten[Daten$Simulationsjahr == 2020, c("Variante", "mw", "Bev")]
+# Daten <- read.csv2(file = "14_bevoelkerungsvorausberechnung_daten.csv")
+# Daten2019 <- Daten[Daten$Simulationsjahr == 2019, c("Variante", "mw", "Bev")]
+# #tapply(Daten2019$Bev, Daten2019$Variante, sum)
+# Daten2020 <- Daten[Daten$Simulationsjahr == 2020, c("Variante", "mw", "Bev")]
 #tapply(Daten2020$Bev, Daten2019$Variante, sum)
-N <- 83.2*1e6
+load(file = "Bevoelkerung2019.RData")
+N <- Daten2019.2[1]*1e3
 ```
 
 Die Abbildung 1 zeigt, wie sich die Bevölkerung von Deutschland 2019 auf 
@@ -66,8 +67,8 @@ verschiedene Altersgruppen verteilte.
 ```{r, fig.width=7, fig.height=5, fig.cap="Bevölkerung in Deutschland 2019 aufgeteilt in Altersgruppen."}
 library(ggplot2)
 library(ggsci)
-Daten2019.1 <- Daten[Daten$Simulationsjahr == 2019 & Daten$Variante == 1,]
-Daten2019.2 <- colSums(Daten2019.1[,-(1:3)])
+#Daten2019.1 <- Daten[Daten$Simulationsjahr == 2019 & Daten$Variante == 1,]
+#Daten2019.2 <- colSums(Daten2019.1[,-(1:3)])
 N.0.20 <- sum(Daten2019.2[2:21])/Daten2019.2[1]*N
 N.20.40 <- sum(Daten2019.2[22:41])/Daten2019.2[1]*N
 N.40.50 <- sum(Daten2019.2[42:51])/Daten2019.2[1]*N

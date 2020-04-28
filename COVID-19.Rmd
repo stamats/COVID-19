@@ -45,12 +45,13 @@ Zahlen des Statistischen Bundesamtes für 2019 (Simulationsvariante 1) und
 gehen folglich von einer Bevölkerungszahl von 83,2 Mio.\ Menschen aus [@Destatis2020].
 
 ```{r}
-Daten <- read.csv2(file = "14_bevoelkerungsvorausberechnung_daten.csv")
-Daten2019 <- Daten[Daten$Simulationsjahr == 2019, c("Variante", "mw", "Bev")]
-#tapply(Daten2019$Bev, Daten2019$Variante, sum)
-Daten2020 <- Daten[Daten$Simulationsjahr == 2020, c("Variante", "mw", "Bev")]
+# Daten <- read.csv2(file = "14_bevoelkerungsvorausberechnung_daten.csv")
+# Daten2019 <- Daten[Daten$Simulationsjahr == 2019, c("Variante", "mw", "Bev")]
+# #tapply(Daten2019$Bev, Daten2019$Variante, sum)
+# Daten2020 <- Daten[Daten$Simulationsjahr == 2020, c("Variante", "mw", "Bev")]
 #tapply(Daten2020$Bev, Daten2019$Variante, sum)
-N <- 83.2*1e6
+load(file = "Bevoelkerung2019.RData")
+N <- Daten2019.2[1]*1e3
 ```
 
 Die Abbildung 1 zeigt, wie sich die Bevölkerung von Deutschland 2019 auf 
@@ -59,8 +60,8 @@ verschiedene Altersgruppen verteilte.
 ```{r, fig.width=7, fig.height=5, fig.cap="Bevölkerung in Deutschland 2019 aufgeteilt in Altersgruppen."}
 library(ggplot2)
 library(ggsci)
-Daten2019.1 <- Daten[Daten$Simulationsjahr == 2019 & Daten$Variante == 1,]
-Daten2019.2 <- colSums(Daten2019.1[,-(1:3)])
+#Daten2019.1 <- Daten[Daten$Simulationsjahr == 2019 & Daten$Variante == 1,]
+#Daten2019.2 <- colSums(Daten2019.1[,-(1:3)])
 N.0.20 <- sum(Daten2019.2[2:21])/Daten2019.2[1]*N
 N.20.40 <- sum(Daten2019.2[22:41])/Daten2019.2[1]*N
 N.40.50 <- sum(Daten2019.2[42:51])/Daten2019.2[1]*N
@@ -148,13 +149,13 @@ Lässt man das Alter außer Acht, so ergibt sich eine kumulierte Letalität von
 Einschätzung des Robert-Koch-Instituts, welches von einer Letalität von 
 1-2 % ausgeht [@wiki:COVID].
 Diese Zahlen liegen auch einer aktuellen Simulationsstudie zur Reduktion von 
-Sozialkontakten und deren Auswirkung auf die Pandemie sowie die Herdenimunität 
+Sozialkontakten und deren Auswirkung auf die Pandemie sowie die Herdenimmunität 
 für Polen und Deutschland zu Grunde [@Bock2020, Table 1], auf deren Ergebnisse
 wir später noch etwas eingehen werden. 
 
 ### Adjustierte Letalitäten in China bis 11.02.
 
-Neben den beobachteten Letalitäten finden sich in der Arbeit von Verify et al.
+Neben den beobachteten Letalitäten finden sich in der Arbeit von Verity et al.
 (2020) auch adjustierte Letalitäten. Hier wurden Anpassungen an die Demographie
 und die Dunkelziffer vorgenommen. Es sind hierbei auch sogenannte Bayes'sche 
 95% Glaubwürdigkeitsintervalle (95%-BGI) angegeben [@Verity2020, Table 1]. 
@@ -548,7 +549,7 @@ nur die obere Grenze des 95%-Konfidenzbandes klar zu sehen.
 
 Legen wir die Zahlen aus Korea zugrunde, so liegt die erwartete Anzahl von 
 Toten bei einer angenommenen Durchseuchung von 60-70% bei ca. 0,76-0,87 
-Millionen Tote in Deutschland, wobei die statistische Unsicherheit deutlich 
+Millionen Toten in Deutschland, wobei die statistische Unsicherheit deutlich 
 größer ist als bei den Zahlen aus China. Folglich sind auch deutlich mehr als 
 1,0 Millionen Tote nicht auszuschließen. Bei einer geringen Durchseuchung von 
 nur 15% oder weniger könnten in Deutschland wohl deutlich mehr als 0,5
