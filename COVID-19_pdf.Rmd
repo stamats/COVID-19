@@ -155,13 +155,13 @@ Lässt man das Alter außer Acht, so ergibt sich eine kumulierte Letalität von
 Einschätzung des Robert-Koch-Instituts, welches von einer Letalität von 
 1-2 % ausgeht [@wiki:COVID].
 Diese Zahlen liegen auch einer aktuellen Simulationsstudie zur Reduktion von 
-Sozialkontakten und deren Auswirkung auf die Pandemie sowie die Herdenimunität 
+Sozialkontakten und deren Auswirkung auf die Pandemie sowie die Herdenimmunität 
 für Polen und Deutschland zu Grunde [@Bock2020, Table 1], auf deren Ergebnisse
 wir später noch etwas eingehen werden. 
 
 ### Adjustierte Letalitäten in China bis 11.02.
 
-Neben den beobachteten Letalitäten finden sich in der Arbeit von Verify et al.
+Neben den beobachteten Letalitäten finden sich in der Arbeit von Verity et al.
 (2020) auch adjustierte Letalitäten. Hier wurden Anpassungen an die Demographie
 und die Dunkelziffer vorgenommen. Es sind hierbei auch sogenannte Bayes'sche 
 95% Glaubwürdigkeitsintervalle (95%-BGI) angegeben [@Verity2020, Table 1]. 
@@ -462,7 +462,7 @@ gg1
 ```
 
 Durch die Adjustierung der Letalitäten ergeben sich gewissen Veränderungen in
-den Altersgruppern. Die Gesamtzahl der Toten bei einer Durchseuchung von 
+den Altersgruppen. Die Gesamtzahl der Toten bei einer Durchseuchung von 
 60-70% verändert sich nur wenig. Die erwartete Anzahl von Toten sinkt um ca. 
 30.000 auf ca. 1,23-1,44 Millionen Tote in Deutschland. Entsprechend ergibt
 sich auch bei dieser Berechnung, dass man durch eine geringe Durchseuchung 
@@ -554,7 +554,7 @@ nur die obere Grenze des 95%-Konfidenzbandes klar zu sehen.
 
 Legen wir die Zahlen aus Korea zugrunde, so liegt die erwartete Anzahl von 
 Toten bei einer angenommenen Durchseuchung von 60-70% bei ca. 0,76-0,87 
-Millionen Tote in Deutschland, wobei die statistische Unsicherheit deutlich 
+Millionen Toten in Deutschland, wobei die statistische Unsicherheit deutlich 
 größer ist als bei den Zahlen aus China. Folglich sind auch deutlich mehr als 
 1,0 Millionen Tote nicht auszuschließen. Bei einer geringen Durchseuchung von 
 nur 15% oder weniger könnten in Deutschland wohl deutlich mehr als 0,5
